@@ -1,0 +1,85 @@
+1.渠道组查询
+
+接口地址：https://dev.smileteeth.cn/Marketing/partner/group
+
+
+返回格式：json/xml
+请求方式：get
+请求头：
+Accept: application/json, text/plain, */*
+Accept-Encoding: gzip, deflate, br
+Accept-Language: zh-CN,zh;q=0.9
+Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJVVUlEIjoiMTU4MDg1MzcyMTIwMzU0MzkiLCJpc3MiOiJHb29kU3RvbmUiLCJleHAiOjE1OTg0MzU3MjYsIm5iZiI6MTU5NzcxNTcyNn0.hlvgQVvKYJ3UHEnONpKWCAi07UmeOvMc8vsdckd4X9w
+Connection: keep-alive
+Cookie: Hm_lvt_5497413cfa59864888408e6d4a10562e=1593325235,1595555796; Hm_lvt_0cb59feb5da30082f1d94b9a39c9d826=1594609558,1595918397,1595987740,1596014419
+Host: dev.smileteeth.cn
+Referer: https://dev.smileteeth.cn/pms/merchant/channel/list
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: same-origin
+User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.3
+
+请求实例：
+https://dev.smileteeth.cn/Marketing/partner/group/page?page=1&size=10&keywords= 
+https://dev.smileteeth.cn/Marketing/partner/group/page?page=1&size=10&keywords=
+接口备注：无
+
+请求参数说明:
+
+参数名称	参数类型	属性	参数说明
+page:	INT	必选	分页的第几页
+size	INT	必选	每页查询多少条数据
+
+返回参数说明：
+
+参数名称	参数类型	属性	参数说明
+code	STR	必选	错误代码，000000表示成功，其他对应相应的错误码
+codeDesc	STR	可选	失败时返回的错误信息
+data	OBJ	必选	返回查询的所有渠道组信息
+groupCode	INT	必选	渠道组编码
+groupName	STR	必选	渠道组名称
+
+json返回实例：
+
+{
+    "code": "000000",
+    "codeDesc": null,
+    "data": {
+        "page": 1,
+        "size": 10,
+        "total": 5,
+        "content": [
+            {
+                "groupCode": 1003,
+                "groupName": "对对对",
+                "groupNotes": "的点点滴滴多多多多多",
+                "createTime": "2020-06-24 12:24:48"
+            },
+            {
+                "groupCode": 1002,
+                "groupName": "对对对",
+                "groupNotes": "对对对",
+                "createTime": "2020-06-05 15:26:56"
+            },
+            {
+                "groupCode": 4403,
+                "groupName": "深圳地区",
+                "groupNotes": "针对深圳地区的渠道",
+                "createTime": "2020-04-26 14:56:14"
+            },
+            {
+                "groupCode": 1001,
+                "groupName": "北京市区",
+                "groupNotes": "北京全市的区域",
+                "createTime": "2020-04-16 16:16:42"
+            },
+            {
+                "groupCode": 1000,
+                "groupName": "平台渠道组",
+                "groupNotes": "弘玉医生集团专用",
+                "createTime": "2020-04-13 11:49:56"
+            }
+        ],
+        "hasNext": false
+    }
+}
