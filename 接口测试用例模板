@@ -1,0 +1,36 @@
+接口名称：	渠道组查询	
+
+接口地址：https://dev.smileteeth.cn/Marketing/partner/group
+
+请求方式：get
+
+请求头	:
+Accept: application/json, text/plain, */*
+Accept-Encoding: gzip, deflate, br
+Accept-Language: zh-CN,zh;q=0.9
+Authorization: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJVVUlEIjoiMTU4MDg1MzcyMTIwMzU0MzkiLCJpc3MiOiJHb29kU3RvbmUiLCJleHAiOjE1OTg0MzU3MjYsIm5iZiI6MTU5NzcxNTcyNn0.hlvgQVvKYJ3UHEnONpKWCAi07UmeOvMc8vsdckd4X9w
+Connection: keep-alive
+Cookie: Hm_lvt_5497413cfa59864888408e6d4a10562e=1593325235,1595555796; Hm_lvt_0cb59feb5da30082f1d94b9a39c9d826=1594609558,1595918397,1595987740,1596014419
+Host: dev.smileteeth.cn
+Referer: https://dev.smileteeth.cn/pms/merchant/merchant/list
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: same-origin
+User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36
+
+传参:
+page: 1
+size: 10
+keywords:
+
+响应结果:
+{code: "000000", codeDesc: null, data: {page: 1, size: 10, total: 5,…}}
+code: "000000"
+codeDesc: null
+data: {page: 1, size: 10, total: 5,…}
+page: 1
+size: 10
+total: 5
+content: [{groupCode: 1003, groupName: "对对对", groupNotes: "的点点滴滴多多多多多", createTime: "2020-06-24 12:24:48"},…]
+hasNext: false
+
