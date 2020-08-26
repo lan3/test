@@ -1,0 +1,28 @@
+一.参数文档用.txt文件格式（注意：字段之间用英文逗号隔开，编码要为utf-8,点击文件的另存为可以修改编码格式）
+partnerName,partnerPhone,partnerAddress
+渠道1,13603065191,北京
+渠道2,13603065192,上海
+渠道3,13603065193,深圳
+渠道4,13603065194,珠海
+
+二.参数设置，在post请求的body里或者get请求的param里（注意：post请求参数是写在双引号里，这样就不需要数字转字符串了）
+
+{
+	"groupID":"",
+	"partnerCode": "44034403",
+	"partnerName": "{{partnerName}}",
+	"partnerPhone": "{{partnerPhone}}",
+	"partnerAddress": "{{partnerAddress}}",
+	"partnerLevels": 10,
+	"partnerTags":"[{\"name\":\"好\",\"type\":\"\"},{\"name\":\"优秀\",\"type\":\"success\"},{\"name\":\"一般\",\"type\":\"info\"}]" 
+}
+
+三.执行参数，在Collections中点击三角形图标，打开运行设置界面，点击run
+Environment:选择运行环境
+Iterations:运行次数（这里的次数是指所有在Collections的接口设置运行几次，如果运行一次就取一次文档中第一行参数，如果运行四次依次取文档中的参数，如果运行五次依次取文档中的参数后，多出的次数就取的是最后一行的参数）
+Delay:每次运行之间延迟多少毫秒
+Log Responses:接口的响应日志，一般是默认所有请求
+Data:选择参数文档
+Data File Type：文档类型，和参数文档要保持一致
+
+
