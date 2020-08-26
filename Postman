@@ -1,0 +1,55 @@
+一.post请求设置Headers:
+UUID:15808537212035439
+Content-Type:application/json
+
+二.post请求设置传参在Body:
+参数：
+
+{
+	"groupID":"",
+	"partnerCode": "44034403",
+	"partnerName": "测试专用渠道商1",
+	"partnerPhone": "13603065195",
+	"partnerAddress": "广东省深圳市福田区群星广场",
+	"partnerLevels": 10,
+	"partnerTags":"[{\"name\":\"好\",\"type\":\"\"},{\"name\":\"优秀\",\"type\":\"success\"},{\"name\":\"一般\",\"type\":\"info\"}]" 
+}
+方式：
+选择raw，再选application/json（注意：具体还是要看请求头中要求传入的参数类型是什么,这里的方式对应请求头的Content-Type要一致）
+
+三.获取接口1返回值partnerID作为参数传到下一个接口2:
+
+1）接口1在Tests设置：
+
+//判断请求返回的状态码是否是200
+pm.test("检查返回状态码为200", function () {
+    pm.response.to.have.status(200);
+});
+
+//判断返回的json中code值是否为000000
+pm.test("检查code值为000000", function () {
+    var jsonData = pm.response.json();
+    pm.expect(jsonData.code).to.eql("000000");
+});
+
+//把返回的渠道商ID设置成参数，让其他接口能够获取到这个值
+var jsonData = pm.response.json();
+var qudaoId = jsonData.data;
+pm.globals.set("partnerID", qudaoId);
+
+2）接口2在body设置：
+
+{
+	"partnerID":{{partnerID}},
+	"partnerCode": "44034403",
+	"partnerName": "测试专用渠道商12",
+	"partnerPhone": "13603065195",
+	"partnerAddress": "广东省深圳市福田区群星广场",
+	"partnerLevels": 10,
+	"partnerTags":"[{\"name\":\"好\",\"type\":\"\"},{\"name\":\"优秀\",\"type\":\"success\"},{\"name\":\"一般\",\"type\":\"info\"}]" 
+}
+
+
+
+
+
