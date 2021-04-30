@@ -1,0 +1,146 @@
+# _*_coding:utf-8_*_
+#####################################################################
+#             ┌─┐      ┌─┐
+#       ┌──┘  ┴───┘  ┴──┐
+#       │                          │
+#       │          ───          │
+#       │   ─┬┘       └┬─    │
+#       │                          │
+#       │          ─┴─          │
+#       │                          │
+#       └───┐            ┌──┘
+#               │            │
+#               │            │
+#               │            │
+#               │            └──────────────┐
+#               │                                          │
+#               │      V1.0 2019-6-14    Edward.li         ├─┐
+#               │    根据地址调用高德API获取经纬度V1.0     ├─┘
+#               │                                          │
+#               └─┐    ┐    ┌────┬──┐    ┌──┘
+#                   │  ─┤  ─┤        │  ─┤  ─┤
+#                   └──┴──┘        └──┴──┘
+#####################################################################
+
+import pymysql
+pymysql.install_as_MySQLdb()
+import MySQLdb
+import xlwt
+from datetime import datetime
+import smtplib,os
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
+from email.header import Header
+import time
+import requests
+import re
+
+
+#高德地图授权key
+ak='6f0d1687a731a87a2a3c88e9720fbfe0'
+
+#传入地址，返回对应地址的经纬度信息
+def address(address):
+    url="http://restapi.amap.com/v3/geocode/geo?key=%s&address=%s"%(ak,address)
+    data=requests.get(url)
+    contest=data.json()
+    #print(contest)
+    infocode=contest['infocode'][0]
+    #判断高德地图异常返回值
+    if infocode not in '10000':
+        print('INVALID_PARAMS,Geore API fail!')
+        return '0','0'
+    addcount=contest['count'][0]
+    if addcount  not in '1':
+        print('Wrong results')
+        return '0','0'
+    addgps=contest['geocodes'][0]['location']
+    #根据地址获取纬度 gpsLatitude
+    regLatitude = r',(.+)'
+    wordreg = re.compile(regLatitude)
+    gpsLatitude = re.findall(wordreg, addgps)
+    gpsLatitude = gpsLatitude[0]
+    # 根据地址获取精度 gpsLatitude
+    regLongitude = r'(.+),'
+    wordreg = re.compile(regLongitude)
+    gpsLongitude = re.findall(wordreg, addgps)
+    gpsLongitude = gpsLongitude[0]
+    return gpsLatitude,gpsLongitude
+
+def get_data(sql):
+    # 创建数据库连接.
+    #conn = MySQLdb.connect(host='47.106.69.216', user='root', passwd='Uatdb1234!', db='space_305_cinicmanage',port=3306, charset='utf8')
+    conn = MySQLdb.connect(host='smileteeth.mysql.rds.aliyuncs.com', user='pythonquery', passwd='Aa123456!', db='space_305_cinicmanage',port=3218, charset='utf8')
+    # 创建游标
+    cur = conn.cursor()
+    # 执行查询，
+    cur.execute(sql)
+    # 由于查询语句仅会返回受影响的记录条数并不会返回数据库中实际的值，所以此处需要fetchall()来获取所有内容。
+    result = cur.fetchall()
+    # 关闭游标
+    cur.close()
+    # 关闭数据库连接
+    conn.close
+    # 返给结果给函数调用者。
+    return result
+
+
+def write_data_to_excel(name, sql):
+    # 将sql作为参数传递调用get_data并将结果赋值给result,(result为一个嵌套元组)
+    result = get_data(sql)
+    # 实例化一个Workbook()对象(即excel文件)
+    wbk = xlwt.Workbook()
+    # 新建一个名为Sheet1的excel sheet。此处的cell_overwrite_ok =True是为了能对同一个单元格重复操作。
+    sheet = wbk.add_sheet('Sheet1', cell_overwrite_ok=True)
+    # 设置标题行的样式
+    titlestyle = xlwt.easyxf(
+        'font: bold on, name 宋体, height 250; align: vert centre, horiz centre; borders: top THIN,left THIN,right THIN,bottom THIN')
+    # 设置内容行的样式
+    contentstyle = xlwt.easyxf(
+        'font: name 宋体, height 200; align: vert centre, horiz centre; borders: top THIN,left THIN,right THIN,bottom THIN')
+    # 根据导出的文件设置不同的标题。
+    if 'ClinicGpsData' in name:
+        row0 = [ '渠道ID', 'ClinicID', '诊所名称', '省', '市', '区', '地址','ClinicLongitude','ClinicLatitude','geore经度','geore纬度','执行SQL']
+
+    for i in range(0, len(row0)):
+        sheet.write(0, i, row0[i], titlestyle)
+    # 遍历result中的每个元素。
+    for i in range(len(result)):
+        # 对result的每个子元素作遍历，
+        for j in range(len(result[i])):
+            # 将每一行的每个元素按行号i,列号j,写入到excel中。
+                sheet.write(i + 1, j, str(result[i][j]), contentstyle)
+        clinicCity = str(result[i][4])
+        clinicAdd  = str(result[i][6])
+        print(clinicCity + clinicAdd)
+        addgps=address(clinicCity+clinicAdd)
+        print(' gpsLatitude is :' + addgps[0] + '  gpsLongitude is :' + addgps[1])
+        gpsSql = 'update spacev3_9800_dentalresource.res_clinics set gpsLongitude= \'' + str(addgps[1]) + '\' ,gpsLatitude= \'' + str(addgps[0]) + '\' where ClinicID=' + str(result[i][1]) + ';'
+        sheet.write(i + 1, j + 1, str(addgps[1]), contentstyle)
+        sheet.write(i + 1, j + 2, str(addgps[0]), contentstyle)
+        sheet.write(i + 1, j + 3, str(gpsSql), contentstyle)
+    # 以传递的name+当前日期作为excel名称保存。
+    wbk.save('/home/data/report/' + name )
+    #wbk.save('D:\\Report\\' + name)
+    print('Save ' + name + ' succeed!')
+
+# 如果该文件不是被import,则执行下面代码。
+if __name__ == '__main__':
+    # 获取当前日期，得到一个datetime对象如：(2016, 8, 9, 23, 12, 23, 424000)
+    today = datetime.today()
+    # 将获取到的datetime对象仅取日期如：2016-8-9
+    today_date = datetime.date(today)
+    # 定义一个字典，key为对应的数据类型也用作excel命名，value为查询语句
+    filegpsclinic = 'ClinicGpsData' + str(today_date) + '.xls'
+
+    db_dict = {
+        #filegpsclinic: 'select C.ServiceID as \'渠道ID\',C.ClinicID,C.ClinicName as \'诊所名称\',C.ProvinceName as \'省\',C.CityName as \'市\',C.CountyName as \'区\',C.ClinicShortAddress as \'地址\',C.ClinicLongitude as \'geore经度\',C.ClinicLatitude as \'geore纬度\'  from space_305_cinicmanage.sys_clinics C  LEFT JOIN space_308_weixinlogin.sys_groups G on G.ServiceID= C.ServiceID where  C.`ClinicShortAddress` IS NOT NULL and (C.ClinicLongitude = 0 or C.ClinicLatitude = 0  )',
+        filegpsclinic: 'select C.ServiceCode as \'渠道ID\',C.ClinicID,C.ClinicName as \'诊所名称\',C.ProvinceName as \'省\',C.CityName as \'市\',C.DistrictName as \'区\',C.ClinicAddress as \'地址\',C.gpsLongitude as \'geore经度\',C.gpsLatitude as \'geore纬度\'  from spacev3_9800_dentalresource.res_clinics C  where  C.`ClinicAddress` IS NOT NULL  and (c.gpsLongitude is  null or c.gpsLongitude=0 )'
+        }
+    # 遍历字典每个元素的key和value。
+    for k, v in db_dict.items():
+        # 用字典的每个key和value调用write_data_to_excel函数。
+        write_data_to_excel(k, v)
+
+
