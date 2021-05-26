@@ -1,0 +1,49 @@
+import smtplib
+from datetime import time, datetime
+from email._header_value_parser import Header
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+
+class SendMail():
+
+    def sendMail:
+        # 设置收件人邮箱地址
+        sender = 'lifang.lan@tooth28.cn'
+        username = 'mailsender@smileteeth.cn'
+        password = 'Rx6Vkz726MOi'
+        # 设置收件人邮箱地址
+        msg_to = ['lan950824@163.com', '2847207706@qq.com']
+        subject = 'python email test'
+        smtpserver = 'smtp.mxhichina.com'
+
+        #获取当前日期
+        today = datetime.today()
+        today_date = datetime.date(today)
+        mail_title = '优惠券核销' + str(today_date)
+        msgRoot = MIMEMultipart('related')
+        msgRoot['Subject'] = Header(mail_title, 'utf-8')
+        msgRoot['From'] = Header(sender, 'utf-8')
+        msgRoot['To'] = ','.join(msg_to)
+        file = 'couponreport_' + str(today_date) + '.xls'
+        # 用字典的每个key和value调用write_data_to_excel函数。
+        att = MIMEText(open('/home/data/report/weekReport/' + file, 'rb').read(), 'base64', 'utf-8')
+        att["Content-Type"] = 'application/octet-stream'
+        att.add_header('Content-Disposition', 'attachment', filename=file)
+        msgRoot.attach(att)
+        time.sleep(20)
+        smtp = smtplib.SMTP()
+        print('Ready to connect smtp...')
+        smtp.connect('smtp.mxhichina.com', 587)
+        print('Connect success...')
+        smtp.login(username, password)
+        print('Login success...')
+        # smtp.sendmail(sender, receiver, msgRoot.as_string())
+        smtp.sendmail(sender, msgRoot['To'].split(','), msgRoot.as_string())
+        print('Send Email success...')
+        # 填入邮件的相关信息并发送
+        time.sleep(30)
+        smtp.quit()
+
+    if __name__ == '__main__':
+
