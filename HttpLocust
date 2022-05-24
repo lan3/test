@@ -1,0 +1,42 @@
+from locust import HttpLocust
+from locust import HttpUser
+from locust import task
+from locust import TaskSet
+
+
+# 方法一：启动web，通过web端进行参数设置
+#
+#     1)dos进入项目的Scripts目录下，执行 locust -f ****.py --host=http://0.0.0.0:0000    (PS：-f后面加需要执行的.py文件名字      --host测试的http服务的ip和port）
+#
+#     2)打开浏览器，如果是本机访问则输入http://localhost:8089/    如下图    （PS：Number of users to simulate：设置模拟的用户总数，Hatch rate (users spawned/second)：每秒启动的虚拟用户数 ，Start swarming：执行locust脚本)
+# ————————————————
+# 版权声明：本文为CSDN博主「可爱的小豆芽儿」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+# 原文链接：https://blog.csdn.net/u010481688/article/details/89083239
+
+# 指定一个任务集
+class My_task_set(TaskSet):
+    # 这是某个任务,30是比例，比如这里是30/50
+    @task(30)
+    def getindex1(self):
+        # catch_response，告诉locust如何判断请求失败还是成功
+        res = self.client.get("/bainianminguo/p/10952586.html")
+        if res.code == 200:
+            res.success()
+        else:
+            res.failure("ff")
+        print(res)
+
+    @task(20)
+    def getindex2(self):
+        # client就是个requests对象
+        res = self.client.get("/bainianminguo/p/7253930.html")
+        print(res)
+
+
+class WebSite(HttpUser):
+    # 指定要执行哪个任务集
+    tasks = [My_task_set, ]
+    # 请求和请求之间最小的间隔时间
+    min_wait = 1000
+    # 请求和请求之间最大的间隔时间
+    max_waif = 2000
