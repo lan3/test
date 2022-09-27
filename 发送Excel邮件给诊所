@@ -1,0 +1,46 @@
+import os
+import shutil
+import re
+import xlwt, xlrd
+import zmail
+import time
+
+path = "D:\check"  # 绝对路径
+file_list = os.listdir(path)
+# print(file_list)
+
+data = xlrd.open_workbook('D:\\clinicinfo.xlsx')
+# 读取第一个工作表
+table = data.sheets()[0]
+# 统计行数
+rows = table.nrows
+data = []  # 存放数据
+for i in range(1, rows):
+    values = table.row_values(i)
+    msg_to = str(values[3])
+    cc_to = str(values[4])
+    dir = values[2]
+    msg_all = msg_to + ',' + cc_to + ',edward.li@goodstone.cc' + ',mailsender01@tooth28.cn' + ',lifang.lan@tooth28.cn'
+    print(msg_to)
+    if os.path.exists(path + '\\' + dir) == True:
+        dir_list = os.listdir(path + '\\' + dir)
+        print(dir + '结算开始。。。。')
+        for j in range(0, len(dir_list)):
+            dir_list[j] = path + '\\' + dir + '\\' + dir_list[j]
+        msg_list = msg_all.split(',')
+        mail = {
+            'subject': dir + '-悦牙空间账单明细!【20220801-20220828结算账单】（请勿回复）!以此为准!!',
+            'content_text': dir + '，您好！附件为各项目结算-月账单明细【2022.08.01-2022.08.28结算账单】，请查收，谢谢。如有疑问，请邮件联系：wujuan.zhang@tooth28.cn。',
+            'attachments': dir_list
+        }
+        print(mail)
+        server = zmail.server('mailsender@tooth28.cn', 'bSdtVnrNTg5oCtHa', config='qq')
+        server.send_mail(msg_list, mail)
+        print(dir + '结算结束。。。。')
+        time.sleep(3)
+        print('睡了3秒。。。。')
+        print(path + '\\' + dir)
+        # 发送失败的邮件存放地址
+        shutil.move(path + '\\' + dir, 'D:\\backup_check\\')
+    else:
+        print(dir + '本次交易不涉及')
