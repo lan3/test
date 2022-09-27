@@ -1,0 +1,89 @@
+"""
+    根据Excel中诊所名称分类保存在另一个Excel中
+"""
+
+import os
+import xlwt, xlrd
+from xlutils.copy import copy
+
+path = "F:\\结算\\自学资料\\拆分后的数据2"  # 绝对路径
+file_list = os.listdir(path)
+# print(file_list)
+now = '20220828'
+data = xlrd.open_workbook('F:\\结算\\自学资料\\要拆分的数据2.xlsx')
+
+tabledetail = data.sheets()[0]  # 读取明细表
+table = data.sheets()[1]  # 读取汇总表
+# 统计行数
+rowdetail = tabledetail.nrows
+rows = table.nrows
+data = []  # 存放数据
+
+# 循环汇总表
+for i in range(1, rows):
+    rowindex = 0
+    # 每一行的值
+    values = table.row_values(i)
+    clinicid = str(values[3])
+    clinicname = values[4]
+    cliniccity = values[2]
+
+    filename = cliniccity + '-齿康保自费项目-' + clinicname + str(now) + '.xls'
+    try:
+        rb = xlrd.open_workbook('F:\\结算\\自学资料\\拆分后的数据2\\齿康保自费项目_' + now + '\\' + filename, formatting_info=True)
+        wbk = copy(rb)
+        print("打开文件成功")
+    except FileNotFoundError:
+        # 实例化一个Workbook()对象(即excel文件)
+        wbk = xlwt.Workbook()
+        print("实例化一个Workbook()对象！")
+    # 设置标题行的样式
+    titlestyle = xlwt.easyxf(
+        'font: bold on, name 宋体, height 250; align: vert centre, horiz centre; borders: top THIN,left THIN,right THIN,bottom THIN')
+    # 设置内容行的样式
+    contentstyle = xlwt.easyxf(
+        'font: name 宋体, height 200; align: vert centre, horiz centre; borders: top THIN,left THIN,right THIN,bottom THIN')
+    # 根据导出的文件设置不同的标题。
+    datastyle = xlwt.XFStyle()
+    datastyle.num_format_str = 'YYYY/MM/DD/ hh:mm:ss'
+
+    sheet0 = wbk.add_sheet('汇总', cell_overwrite_ok=True)
+    row0 = ['诊所ID', '诊所名称', '自费项目金额（元）', '手续费6‰（元）', '结算总金额（元）']
+    for k in range(0, len(row0)):
+        sheet0.write(0, k, row0[k], titlestyle)
+    temprow = 0
+    # 获取汇总表中的每一行的值
+    for k in range(len(values)):
+        # 将该表对应的行写入新表中
+        a = [3, 4, 6, 7]
+        if k in a:
+            sheet0.write(1, temprow, str(values[k]), contentstyle)
+            temprow = temprow + 1
+        elif k == 8:
+            sheet0.write(1, temprow, str(round(values[k], 2)), contentstyle)  # 保留两位小数
+            temprow = temprow + 1
+
+    sheet = wbk.add_sheet('数据明细', cell_overwrite_ok=True)
+    row0 = ['诊所ID', '诊所名称', '自付金额', '支付方式', '付款时间']
+    for k in range(0, len(row0)):
+        sheet.write(0, k, row0[k], titlestyle)
+    # 循环明细表
+    for j in range(1, rowdetail):
+        valuesdetail = tabledetail.row_values(j)
+        cliniciddetail = str(valuesdetail[16])
+        print('clinicid = ' + clinicid + ' and  cliniciddetail = ' + cliniciddetail)
+        if clinicid == cliniciddetail:
+            temprow = 0
+            for k in range(len(valuesdetail)):
+                # 将该表对应的行写入新表中
+                a = [16, 18, 19, 20, 21]
+                if k in a:
+                    sheet.write(rowindex + 1, temprow, str(valuesdetail[k]), contentstyle)
+                    temprow = temprow + 1
+            rowindex = rowindex + 1
+
+    new_folder_path = 'F:\\结算\\自学资料\\拆分后的数据2\\齿康保自费项目_' + now + '\\' + cliniccity + '\\'
+    if not os.path.exists(new_folder_path):
+        os.makedirs(new_folder_path)
+    wbk.save(new_folder_path + filename)
+    print('Save ' + filename + ' succeed!')
